@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>		
+			
+		* {
+			box-sizing: border-box;
+		}
+		
+		body{
+			color: white;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 20px;
+		}
+		
+		h1, h2, h3 {
+			text-decoration: underline;
+		}
+		
+		table
+		{ 
+		    margin-left: auto;
+			margin-right: auto;
+		}
+		td {
+			text-align: center;
+		}
+		
+		.center {
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		
+		.bottomtext {
+			vertical-align: bottom;
+		}
+		
+		.img-magnifier-container {
+			position:relative;
+		}
+		
+		.img1-container {
+			border: 3px solid #FFFFFF;
+			width: 356px;
+			height: 530px;
+			margin: 0 auto;
+		}
+		
+		.adhoc {
+			width: 369px;
+			height: 558px;
+			margin: 0 auto;
+		}
+		
+		.img2-container {
+			border: 3px solid #00FF00;
+			width: 356px;
+			height: 530px;
+			margin: 0 auto;
+		}
+		
+		.img3-container {
+			border: 3px solid #FF0000;
+			width: 356px;
+			height: 530px;
+			margin: 0 auto;
+		}
+		
+		.img-magnifier-glass {
+			position: absolute;
+			top: 0px;
+		  	left: 0px;
+		  	border: 3px solid #000;
+		  	border-radius: 50%;
+		  	cursor: none;
+		  	/*size of the magnifier glass:*/
+		  	width: 125px;
+		  	height: 125px;
+		}
+		
+		.img-zoom-box1 {
+		  	position: absolute;
+		  	top: 239px;
+		  	left: 256px;
+		  	border: 1px solid #00FF00;
+		  	cursor: none;
+		  	width: 32px;
+		  	height: 47px;
+		}
+		
+		.img-zoom-box2 {
+		  position: absolute;
+		  top: 7px;
+		  left: 311px;
+		  border: 1px solid #FF0000;
+		  cursor: none;
+		  width: 32px;
+		  height: 47px;
+		}
+		
+		
+		#myBtn {
+			display: none;
+			position: fixed;
+			bottom: 20px;
+			right: 30px;
+			z-index: 99;
+			font-size: 18px;
+			border: none;
+			outline: none;
+			background-color: red;
+			color: white;
+			cursor: pointer;
+			padding: 15px;
+			border-radius: 4px;
+		}
+		
+		#myBtn:hover {
+			background-color: #555;
+		}		
+		
+		
+		img[id*='vectorsImg'] {
+		  /*border-radius: 5px;*/
+		  cursor: pointer;
+		  transition: 0.3s;
+		}
+		
+		img[id*='vectorsImg']:hover {opacity: 0.7;}
+		
+		/* The Modal (background) */
+		.modal {
+		  display: none; /* Hidden by default */
+		  position: fixed; /* Stay in place */
+		  z-index: 1; /* Sit on top */
+		  padding-top: 100px; /* Location of the box */
+		  left: 0;
+		  top: 0;
+		  width: 100%; /* Full width */
+		  height: 100%; /* Full height */
+		  overflow: auto; /* Enable scroll if needed */
+		  background-color: rgb(0,0,0); /* Fallback color */
+		  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+		}
+		
+		/* Modal Content (image) */
+		.modal-content {
+		  margin: auto;
+		  display: block;
+		  width: 80%;
+		  max-width: 700px;
+		}
+		
+		/* Caption of Modal Image */
+		div[id*='vectorsModalCaption'] {
+		  margin: auto;
+		  display: block;
+		  width: 80%;
+		  max-width: 700px;
+		  text-align: center;
+		  color: #ccc;
+		  padding: 10px 0;
+		  height: 150px;
+		}
+		
+		/* Add Animation */
+		.modal-content, div[id*='vectorsModalCaption'] {  
+		  -webkit-animation-name: zoom;
+		  -webkit-animation-duration: 0.6s;
+		  animation-name: zoom;
+		  animation-duration: 0.6s;
+		}
+		
+		@-webkit-keyframes zoom {
+		  from {-webkit-transform:scale(0)} 
+		  to {-webkit-transform:scale(1)}
+		}
+		
+		@keyframes zoom {
+		  from {transform:scale(0)} 
+		  to {transform:scale(1)}
+		}
+		
+		/* The Close Button */
+		.close {
+		  position: absolute;
+		  top: 15px;
+		  right: 35px;
+		  color: #f1f1f1;
+		  font-size: 40px;
+		  font-weight: bold;
+		  transition: 0.3s;
+		}
+		
+		.close:hover,
+		.close:focus {
+		  color: #bbb;
+		  text-decoration: none;
+		  cursor: pointer;
+		}
+		
+		/* 100% Image Width on Smaller Screens */
+		@media only screen and (max-width: 700px){
+		  .modal-content {
+		    width: 100%;
+		  }
+		}
+		
+	</style>
+	<script>
+		function magnify(imgID) {
+		  /* zoom box 1: bottom 2625 (top 2647), left 2830, height 524, width 350  */
+		  /* zoom box 2: bottom 5200 (top 72), left 3440 */
+		  var img, glass, w, h, bw, zoom;
+		  img = document.getElementById(imgID);
+		  zoom = 2 * 5796 / img.height; /* 2px on screen = 1px of img */
+		  /*create magnifier glass:*/
+		  glass = document.createElement("DIV");
+		  glass.setAttribute("class", "img-magnifier-glass");
+		  /*insert magnifier glass:*/
+		  img.parentElement.insertBefore(glass, img);
+		  /*set background properties for the magnifier glass:*/
+		  glass.style.backgroundImage = "url('" + img.src + "')";
+		  glass.style.backgroundRepeat = "no-repeat";
+		  glass.style.backgroundSize = Math.round(img.width * zoom) + "px " + Math.round(img.height * zoom) + "px";
+		  /* glass.style.backgroundSize = "3870px 5796px"; */
+		  bw = 3;
+		  w = glass.offsetWidth / 2;
+		  h = glass.offsetHeight / 2;
+		  /*execute a function when someone moves the magnifier glass over the image:*/
+		  glass.addEventListener("mousemove", moveMagnifier);
+		  img.addEventListener("mousemove", moveMagnifier);
+		  /*and also for touch screens:*/
+		  glass.addEventListener("touchmove", moveMagnifier);
+		  img.addEventListener("touchmove", moveMagnifier);
+		  
+		  function moveMagnifier(e) {
+		    var pos, x, y;
+		    /*prevent any other actions that may occur when moving over the image*/
+		    e.preventDefault();
+		    /*get the cursor's x and y positions:*/
+		    pos = getCursorPos(e);
+		    x = pos.x;
+		    y = pos.y;
+		    /*prevent the magnifier glass from being positioned outside the image:*/
+		    if (x > img.width - Math.round(w / zoom)) {x = img.width - Math.round(w / zoom);}
+		    if (x < Math.round(w / zoom)) {x = Math.round(w / zoom);}
+		    if (y > img.height - Math.round(h / zoom)) {y = img.height - Math.round(h / zoom);}
+		    if (y < Math.round(h / zoom)) {y = Math.round(h / zoom);}
+		    /*set the position of the magnifier glass:*/
+		    glass.style.left = (x - w) + "px";
+		    glass.style.top = (y - h) + "px";
+		    /*display what the magnifier glass "sees":*/
+		    glass.style.backgroundPosition = "-" + (Math.round(x * zoom) - w + bw) + "px -" + (Math.round(y * zoom) - h + bw) + "px";
+		  }
+		  
+		  function getCursorPos(e) {
+		    var a, x = 0, y = 0;
+		    e = e || window.event;
+		    /*get the x and y positions of the image:*/
+		    a = img.getBoundingClientRect();
+		    /*calculate the cursor's x and y coordinates, relative to the image:*/
+		    x = e.pageX - a.left;
+		    y = e.pageY - a.top;
+		    /*consider any page scrolling:*/
+		    x = x - window.pageXOffset;
+		    y = y - window.pageYOffset;
+		    return {x : x, y : y};
+		  }
+		}
+	</script>
+</head>
+<body style="background-color:black;">
+<h1>
+	Wide-field DSLR astro-photography post-processing in Pixinsight 
+</h1>
+<p>
+	This is the report of my first hands-on to Pixinsight, for which I obtained a trial license recently. 
+</p>
+<h2>
+	Table of Contents 
+</h2>
+<ul>
+	<li><a href="#setting">Setting</a></li>
+	<li><a href="#postproc">Step-by-step Post-processing</a> 
+	<ul>
+		<li><a href="#calibration">Lights, Darks, Flats &amp; Co: light frames calibration and integration</a></li>
+		<li><a href="#platesolving">An interlude: plate solving</a></li>
+		<li><a href="#stretching">Light pollution removal, color balancing, de-noising, and stretching</a></li>
+	</ul>
+	</li>
+	<li><a href="#final">Final result and comparison with initial light frame</a> 
+</ul>
+<h2 id="setting">
+	Setting 
+</h2>
+<p>
+	Time, location and target (center of image): 
+</p>
+<ul>
+	<li>Lat: 46<span>&#176;</span> 41' 7.48" N</li>
+	<li>Lon: 12<span>&#176;</span> 22' 7.01" E</li>
+	<li>Altitude: 1350 MSL</li>
+	<li>Date: 6 Jan 2022</li>
+	<li>Time: 21:24 UTC</li>
+	<li>Target Declination: 27<span>&#176;</span> 4' 27.04"</li>
+	<li>Target Right Ascension: 2h 5' 18.3"</li>
+</ul>
+<p>
+The following image shows the target sky area as depicted by Stellarium.
+</p>
+<div class="img1-container">
+	<img id="vectorsImg4" src="stellarium-cropped.jpg" alt="Target as seen in Stellarium" width="350" height="524"><!-- 0.1x zoom -->
+	<div id="vectorsModal4" class="modal">
+<!-- The Close Button -->
+		<span class="close" id="vectorsModalClose4">&times;</span> 
+<!-- Modal Content (The Image) -->
+		<img class="modal-content" id="vectorsModalContent4"> 
+<!-- Modal Caption (Image Text) -->
+		<div id="vectorsModalCaption4">
+		</div>
+	</div>
+</div>
+<p>
+	Equipment: 
+</p>
+<ul>
+	<li>Camera: Canon EOS 5D Mark III</li>
+	<li>Lens: Canon EF 16-35mm f/4L IS USM</li>
+	<li>Fixed tripod: Manfrotto MT293A4 Series 290</li>
+</ul>
+<p>
+	Camera settings (light and dark frames): 
+</p>
+<ul>
+	<li>Single exposure time: 20s (maximum to avoid star trails as given by NPF rule)</li>
+	<li>ISO: 3200</li>
+	<li>Focal length: 16mm</li>
+	<li>Aperture diameter: f/4</li>
+</ul>
+<p>
+	Exposures taken: 
+</p>
+<ul>
+	<li>10 light frames</li>
+	<li>10 dark frames</li>
+	<li>60 flats (Tv = 1/15s, f = 16mm, Av = f/4, ISO = 100)</li>
+	<li>60 flat darks (same as above)</li>
+	<li>60 bias frames (Tv = 1/8000s, ISO = 3200)</li>
+</ul>
+<h2 id="postproc">
+	Step-by-step Post-processing 
+</h2>
+<p>
+	Below I will report the result of each of the steps I took in the post-processing workflow (mainly as adviced <a href="https://web.archive.org/web/20140426110751/http://lightvortexastronomy.blogspot.com/2013/12/tutorial-post-processing-pixinsight.html">here</a>). 
+</p>
+<p>
+	For each step, I will report 
+</p>
+<ul>
+	<li>A full-size preview (framed in white) of the image (roughly with a zoom of 0.1x), equipped with a 20x magnifier (so that the magnified area will appear with a zoom exactly equal to 2x),</li>
+	<li> A couple of 1x crop previews for two specific small areas of the image, namely 
+	<ul>
+		<li>a focus centered on the Andromeda galaxy (framed in <span style="color: #00FF00">green</span>), as this is a detail I have been monitoring closely during the process,</li>
+		<li>a focus on the top-right corner of the image (framed in <span style="color: #FF0000;">red</span>), just to keep an eye on a very critical part of the image, suffering from heavy vignetting (so higher noise after calibration), all kinds of optical aberrations, astigmatism etc. 
+	</ul>
+	</li>
+</ul>
+<p>
+	Let's beging with calibration and integration. 
+</p>
+<h3 id="calibration">
+	Lights, Darks, Flats &amp; Co: light frames calibration and integration 
+</h3>
+<table>
+<!--  BIAS FRAME -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Let's start with the master bias frame. This is the result of the integration process of the 60 bias frames: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="z3_biasIntegrated" src="z3a_biasIntegrated.jpg" alt="z3a_biasIntegrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="z3b_biasIntegrated.jpg" alt="z3b_biasIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="z3c_biasIntegrated.jpg" alt="z3c_biasIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Of course the original linear data was heavily stretched here merely for display purposes. Linear signal data is ( 3.128 <span>&#177;</span> 0.016 ) e-2 on a normalized [0,1] scale. 
+		</p>
+		</td>
+	</tr>
+<!--  DARK FRAME -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Now let's have a look at the master dark frame, resulting from the integration of the 10 dark frames: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="z1_darkIntegrated" src="z1a_darkIntegrated.jpg" alt="z1a_darkIntegrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="z1b_darkIntegrated.jpg" alt="z1b_darkIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="z1c_darkIntegrated.jpg" alt="z1c_darkIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Linear signal data is ( 3.126 <span>&#177;</span> 0.019 ) e-2. A slightly higher value for standard deviation is expected with respect to bias frame, as we are capturing dark current noise and hot pixels here. However, I was a bit puzzled by the lower average value, even though most likely it is not statistically meaningful. I expected a higher average value as I presumed that hot pixels and dark current would mean higher values overall. 
+			I also see some evident vertical banding which was not present in the bias frame. This must be the footprint of dark current I guess. 
+		</p>
+		</td>
+	</tr>
+<!--  DARK MINUS BIAS -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Indeed, horizontal and vertical banding appears even more evident by substracting bias from dark (and stretching a lot the result of course): 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="z4_darkMinusBias" src="z4a_darkMinusBias.jpg" alt="z4a_darkMinusBias" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="z4b_darkMinusBias.jpg" alt="z4b_darkMinusBias" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="z4c_darkMinusBias.jpg" alt="z4c_darkMinusBias" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+<!--  FLAT FRAME -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Next, the master flat frame, resulting from the integration of the calibrated (using flat darks, in turn integrated) flat frames: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="z2_flatIntegrated" src="z2a_flatIntegrated.jpg" alt="z2a_flatIntegrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="z2b_flatIntegrated.jpg" alt="z2b_flatIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="z2c_flatIntegrated.jpg" alt="z2c_flatIntegrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Vignetting is the clear winner here. 
+		</p>
+		<p>
+			As a side note: obtaining correct flat frames proved to be one of the most challenging tasks in the whole process. At this extreme wide angle (almost 110<span>&#176;</span> diagonally), just pointing the camera at the sky (even with clear sky) did not provide a homogeneous result, but also using an LCD display was not good enough, as I would need a light source emitting light homogeneously in a 110<span>&#176;</span> viewing angle. Impossible. I always ended up having over-corrected vignetting. Eventually, when I was about to give up, I found that taping a sheet of translucent acrylic glass on top of the LCD display provided (at least apparently) a good source of homogenous light. 
+		</p>
+		</td>
+	</tr>
+<!--  SAMPLE LIGHT -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Now, finally, let there be light! So one of the light frames, as an example: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="01_singleShot" src="01a_singleShot.jpg" alt="01a_singleShot" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="01b_singleShot.jpg" alt="01b_singleShot" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="01c_singleShot.jpg" alt="01c_singleShot" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Please note that this is not a de-bayered image: to better appreciate this, hover the magnifier over the foreground mountain - you will more easily notice the typical RGGB Bayer mosaic pattern. Just as a reference: linear data has mean <span>&#177;</span> std dev equal to ( 3.454 <span>&#177;</span> 0.172 ) e-2. Normalizing this taking as a lower bound my mean bias level @ 3.128 e-2 (seen above) and as an upper bound the level at which my sensor seems to saturate (2.1428 e-1), this translates to 18.9% <span>&#177;</span> 0.9% of my sensor's dynamic range. Unbelievable how close a "light" frame is to a "dark" one, in terms of average linear value. 
+		</p>
+		</td>
+	</tr>
+<!--  CALIBRATED LIGHT -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			And here the same sample light frame above, but now calibrated using dark, flat and bias masters above (also with foreground subject masked out): 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="02_calibrated" src="02a_calibrated.jpg" alt="02_calibrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="02b_calibrated.jpg" alt="02b_calibrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="02c_calibrated.jpg" alt="02c_calibrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			It is evident that noise near the corners of the image has worsened, as vignetting removal meant magnifying both signal and noise in these areas. However, to be honest, I still suspect that my flats may be over-correcting. Difficult to say, anyway, as it is clear that the central area of the image is slightly darker than periphery, but this may be well due to light pollution concentrated on the right side of the image, and milky way on top / left. 
+		</p>
+		</td>
+	</tr>
+<!--  COSMETIC CORRECTED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Same frame as above, with cosmetic correction to get rid of hot pixels that were not cured by calibration: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="03_cosmeticCorrected" src="03a_cosmeticCorrected.jpg" alt="03a_cosmeticCorrected" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="03b_cosmeticCorrected.jpg" alt="03b_cosmeticCorrected" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="03c_cosmeticCorrected.jpg" alt="03c_cosmeticCorrected" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			It may be difficult to spot the differences here. However you may find that a hot pixel just on the right of Andromeda's galaxy is gone now. 
+		</p>
+		</td>
+	</tr>
+<!--  DEBAYERED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			And now let there be color! Same frame as above after de-bayering (or de-mosaicing if you like): 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="04_debayered" src="04a_debayered.jpg" alt="04a_debayered" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="04b_debayered.jpg" alt="04b_debayered" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="04c_debayered.jpg" alt="04c_debayered" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			The way I understand it, the reason why we are de-bayering before (registering and) integrating, and not after, is that I am not on a tracking mount here, so it would make little sense to integrate single RGGB pixel arrays with a moving target: indeed, even after registering images, the same light source may fall on a Red pixel in one shot, on a Green one in another, and on a Blue one in a third one. 
+		</p>
+		</td>
+	</tr>
+<!--  INTEGRATED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			And finally the result of the integration of the 10 frames, after registering: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="05_integrated" src="05a_integrated.jpg" alt="05a_integrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="05b_integrated.jpg" alt="05b_integrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="05c_integrated.jpg" alt="05c_integrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			As expected, noise reduction is massive in this step. 
+		</p>
+		</td>
+	</tr>
+</table>
+<p>
+	Time to have a look at what we have done so far! On the left, the original sample light frame, here represented as de-bayered and with foreground masked in order to simplify comparison with the right, which is the final master light frame. 
+</p>
+<table>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="01_singleShotDebayered" src="01a_singleShotDebayered.jpg" alt="01a_singleShotDebayered" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="05_integrated_recap" src="05a_integrated.jpg" alt="05a_integrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			With a 0.1x zoom, noise reduction is not particularly noticeable. What is evident is the de-vignetting achieved thanks to flat frame substraction -- once again, is it over-correcting? Difficult to say, but it may be the case. However, we know that Dynamic Background Extraction may later fix this somehow. 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img2-container">
+			<div class="img-magnifier-container">
+				<img src="01b_singleShotDebayered.jpg" alt="01b_singleShotDebayered" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<div class="img-magnifier-container">
+				<img src="05b_integrated.jpg" alt="05b_integrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Andromeda galaxy has definitely gained from the calibration and integration process -- its disc now clearly stemming from the background. Also, the removal of the red hot pixel is more evident after de-bayering. 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img3-container">
+			<div class="img-magnifier-container">
+				<img src="01c_singleShotDebayered.jpg" alt="01c_singleShotDebayered" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<div class="img-magnifier-container">
+				<img src="05c_integrated.jpg" alt="05c_integrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			The outer area near the top-right corner has undergone massive amplification to correct for vignetting during the calibration phase, and noise reduction achieved through integration is very clear. Also in this case a hot blue pixel has been removed thanks to Cosmetic Correction. 
+		</p>
+		</td>
+	</tr>
+</table>
+<h3 id="platesolving">
+	An interlude: plate solving 
+</h3>
+<p>
+	Since I wanted to try color calibration via the magical Photometric Color Calibration tool, I needed to plate-solve my image. This proved to be pretty hard, given my lens strong distortion, so that Image Solver could not succeed. In the end, I had to follow the steps below: 
+</p>
+<ol>
+	<li>Generate synthetic image spanning roughly the same sky area via Catalog Star Generator;</li>
+	<li>Pick couples of control points on the synthetic image vis-a-vis my original image, as many (and as scattered) as possible over the entire area -- and particularly near the edges, in order to capture the extreme effect of distortion that can be found there;</li>
+	<li>Run Manual Image Solver to plate-solve my image, also producing, as a side product, a distortion model for later re-use;</li>
+	<li>Finally, further refine plate-solving by running Image Solver (with the option 'Only apply optimization' selected).</li>
+</ol>
+<p>
+	The following couple of images displays 
+</p>
+<ul>
+	<li>on the left: the 126 stars I used to manually plate-solve my image as per step 2 above (starting point of green vectors) and their expected position in absence of distortion (ending point of green vectors)..</li>
+	<li>on the right: the distortion model as depicted by PixInsight</li>
+</ul>
+<table>
+	<tr class="bottomtext">
+		<td> 
+		<div class="adhoc">
+			<img id="vectorsImg" src="arrows.jpg" alt="126 stars and their displacement induced by lens distortion" width="369" height="558"><!-- 0.1x zoom -->
+			<div id="vectorsModal" class="modal">
+<!-- The Close Button -->
+				<span class="close" id="vectorsModalClose">&times;</span> 
+<!-- Modal Content (The Image) -->
+				<img class="modal-content" id="vectorsModalContent"> 
+<!-- Modal Caption (Image Text) -->
+				<div id="vectorsModalCaption">
+				</div>
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img1-container">
+			<img id="vectorsImg2" src="08b_platesolved_inverted.jpg" alt="Distortion model as depicted by PixInsight" width="350" height="524"><!-- 0.1x zoom -->
+			<div id="vectorsModal2" class="modal">
+<!-- The Close Button -->
+				<span class="close" id="vectorsModalClose2">&times;</span> 
+<!-- Modal Content (The Image) -->
+				<img class="modal-content" id="vectorsModalContent2"> 
+<!-- Modal Caption (Image Text) -->
+				<div id="vectorsModalCaption2">
+				</div>
+			</div>
+		</div>
+		</td>
+	</tr>
+</table>
+<p>
+	By the way, the green vector field I represented on the left image is just a depiction of the .csv file representing the distortion model as produced by Manual Image Solver (rendered in Python and overlaid on the master light frame) 
+</p>
+<p>
+	Finally, here comes the plate-solved light master (sorry for the Italian!): 
+</p>
+<div class="img1-container">
+	<img id="vectorsImg3" src="platesolved.jpg" alt="Master light frame plate-solved!" width="350" height="524"><!-- 0.1x zoom -->
+	<div id="vectorsModal3" class="modal">
+<!-- The Close Button -->
+		<span class="close" id="vectorsModalClose3">&times;</span> 
+<!-- Modal Content (The Image) -->
+		<img class="modal-content" id="vectorsModalContent3"> 
+<!-- Modal Caption (Image Text) -->
+		<div id="vectorsModalCaption3">
+		</div>
+	</div>
+</div>
+<p>
+	Now we are ready to tackle color balancing. 
+</p>
+<h3 id="stretching">
+	Light pollution removal, color balancing, de-noising, and stretching 
+</h3>
+<table>
+<!--  INTEGRATED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			So let us start from where we finished, namely the light master frame: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="05_integrated_repeat" src="05a_integrated.jpg" alt="05a_integrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="05b_integrated.jpg" alt="05b_integrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="05c_integrated.jpg" alt="05c_integrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+<!--  BGEed -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			The first step is maybe the most dramatic one, i.e. the removal of light pollution-induced gradient via Dynamic Background Extraction: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="06_DBEed" src="06a_DBEed.jpg" alt="06a_DBEed" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="06b_DBEed.jpg" alt="06b_DBEed" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="06c_DBEed.jpg" alt="06c_DBEed" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Pretty striking. Having removed a yellow cast, the image now has a green cast left over. That will be addressed by the color balancing procedure. 
+		</p>
+		</td>
+	</tr>
+<!--  BGneutralized -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Now, I tried neutralizing background via Background Neutralization: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="07_BGneutralized" src="07a_BGneutralized.jpg" alt="07a_BGneutralized" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="07b_BGneutralized.jpg" alt="07b_BGneutralized" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="07c_BGneutralized.jpg" alt="07c_BGneutralized" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			To be honest, I am not impressed by this step.
+			It seems to leave things unchanged at the best.
+			Not sure if I'm doing something wrong here.
+		</p>
+		</td>
+	</tr>
+<!--  COLOR BALANCED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Now, a long-awaited step, namely color calibration using Photometric Color Calibration (which required plate solving, see previous section): 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="09_colorcalibrated" src="09a_colorcalibrated.jpg" alt="09a_colorcalibrated" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="09b_colorcalibrated.jpg" alt="09b_colorcalibrated" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="09c_colorcalibrated.jpg" alt="09c_colorcalibrated" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+</table>
+<p>
+Next figure shows the PixInsight Photometric Color Calibration tool final report.
+</p>
+<div class="img1-container">
+	<img id="vectorsImg5" src="09d_colorcalibrated.png" alt="PixInsight Photometric Color Calibration tool final report" width="350" height="524"><!-- 0.1x zoom -->
+	<div id="vectorsModal5" class="modal">
+<!-- The Close Button -->
+		<span class="close" id="vectorsModalClose5">&times;</span> 
+<!-- Modal Content (The Image) -->
+		<img class="modal-content" id="vectorsModalContent5"> 
+<!-- Modal Caption (Image Text) -->
+		<div id="vectorsModalCaption5">
+		</div>
+	</div>
+</div>
+<p>
+There seems to be some big dispersion here, which may point to a not-so-accurate color balancing, though y scale magnitudes of the scatter plots do not help in assessing this.
+</p>
+<!--  DE-GREENED-->
+<table>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Next, from my understanding, assuming that color balancing is now correct I should not see any green in our sky, so green-ish pixels left should only be the consequence of noise.
+			So this is the time to try and fix this by Subtractive Chromatic Noise Reduction:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="10_SCNRdeGreened" src="10a_SCNRdeGreened.jpg" alt="10a_SCNRdeGreened" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="10b_SCNRdeGreened.jpg" alt="10b_SCNRdeGreened" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="10c_SCNRdeGreened.jpg" alt="10c_SCNRdeGreened" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			I had to use this tool with great caution to avoid the emergence of a red cast in particular near the corners of the image.
+			I think that I should have been more aggressive overall with this, if that did not cause problems near the corners.
+		</p>
+		</td>
+	</tr>
+<!-- DE-NOISED MLT-->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			And now to noise reduction.
+			First pass using Multiscale Linear Transform on small-scale RGB/K components:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="11_MLTsmallScaleDenoised" src="11a_MLTsmallScaleDenoised.jpg" alt="11a_MLTsmallScaleDenoised" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="11b_MLTsmallScaleDenoised.jpg" alt="11b_MLTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="11c_MLTsmallScaleDenoised.jpg" alt="11c_MLTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			The effect is evident.
+			Of course noise reduction was applied more aggressively to dark areas, thanks to a mask that was built simply starting from the stretched version of the (linear) image (stretched as suggested by automatic settings of Screen Transfer Function).
+		</p>
+		</td>
+	</tr>
+<!-- DE-NOISED MMT-->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			With the same mask on, I took a second noise reduction step with Multiscale Median Transform, once again on small-scale RGB/K components:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="12_MMTsmallScaleDenoised" src="12a_MMTsmallScaleDenoised.jpg" alt="12a_MMTsmallScaleDenoised" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="12b_MMTsmallScaleDenoised.jpg" alt="12b_MMTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="12c_MMTsmallScaleDenoised.jpg" alt="12c_MMTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Not particularly impressed to be honest.
+		</p>
+		</td>
+	</tr>
+<!-- STRETCHED -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Time to stretch the image! Images shown so far were still in a linear state, and were stretched only for display.
+			Check result below of Histogram Transformation, set to my personal taste:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="13_stretched" src="13a_stretched.jpg" alt="13a_stretched" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="13b_stretched.jpg" alt="13b_stretched" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="13c_stretched.jpg" alt="13c_stretched" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Having stretched a bit more than suggested by automatic Screen Transfer Function settings, in order to make contrast pop out a bit more, some 'dark bubble' pattern emerges in the background, and noise kicks back in particularly near the corners.
+		</p>
+		</td>
+	</tr>
+<!-- DE-NOISE MLT AFTER STRETCHING -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			So let's have another pass with Multiscale Linear Transform:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="14_MLTsmallScaleDenoised" src="14a_MLTsmallScaleDenoised.jpg" alt="14a_MLTsmallScaleDenoised" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="14b_MLTsmallScaleDenoised.jpg" alt="14b_MLTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="14c_MLTsmallScaleDenoised.jpg" alt="14c_MLTsmallScaleDenoised" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Once again, noise reduction was performed more aggressively in dark areas, this time taking as a mask the very same image luminance (extracted by Channel Extraction in the CIE L*a*b* mode).
+		</p>
+		</td>
+	</tr>
+<!-- DE-NOISE ACDNR -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			With the same mask on, let's take a pass with ACD Noise Reduction: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="15_ACDNRdenoised" src="15a_ACDNRdenoised.jpg" alt="15a_ACDNRdenoised" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="15b_ACDNRdenoised.jpg" alt="15b_ACDNRdenoised" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="15c_ACDNRdenoised.jpg" alt="15c_ACDNRdenoised" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			A great enhancement particularly near the corners.
+		</p>
+		</td>
+	</tr>
+<!-- CHROMATIC DE-NOISE via MLT -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Now we want to get rid of the chromatic noise spread all over the background, once again with Multiscale Linear Transform, this time with large-scale Chrominance (instead of small-scale RGB/K components) as the target:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="16_MLTchrDenoised" src="16a_MLTchrDenoised.jpg" alt="16a_MLTchrDenoised" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="16b_MLTchrDenoised.jpg" alt="16b_MLTchrDenoised" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="16c_MLTchrDenoised.jpg" alt="16c_MLTchrDenoised" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			The result is impressive, particularly near the corners.
+			In order to avoid attacking and harming in any way stars and deep sky objects with this aggressive chrominance noise reduction, a mask was used using Range Selection, in order to obtain a more binary 0/1 mask.
+		</p>
+		</td>
+	</tr>
+
+<!-- 2ND STRETCH -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			We are in a position now where we may afford a further slight stretch in order to make contrast pop a little bit more, so let's do it: 
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="17_stretched" src="17a_stretched.jpg" alt="17a_stretched" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="17b_stretched.jpg" alt="17b_stretched" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="17c_stretched.jpg" alt="17c_stretched" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Did I push too far?
+			Maybe.
+			Noise looks low to me, but some dark blotches have been emphasized.
+			However, I decided to live with it as I like the overall effect of this second stretch.
+		</p>
+		</td>
+	</tr>
+<!-- LOCAL CONTRAST -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Finally, some slight contrast increase in strong signal areas.
+			Of course this is not particularly important with this kind of subject, lacking a prominent DSO object.
+			However, I wanted to take practice in this procedure.
+			So here it is, a slight touch of local contrast via Local Histogram Equalization:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="18_LHElocContrasted" src="18a_LHElocContrasted.jpg" alt="18a_LHElocContrasted" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="18b_LHElocContrasted.jpg" alt="18b_LHElocContrasted" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="18c_LHElocContrasted.jpg" alt="18c_LHElocContrasted" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3"> 
+		<p>
+			In order to attack only strong signal areas, a mask was built as the union (addition) of two masks, that were generated separately via Star Mask and Range Selection.
+			I also took the chance to enhance slightly contrast on the negative mask, though I'm not 100% sure it was a good idea after all.
+			As a side note, for some reason beyond my comprehension, this process yields a sort of brighter halo on the horizon -- which I will later correct in PhotoShop.
+		</p>
+		</td>
+	</tr>
+<!-- GLOBAL CONTRAST AND SATURATION -->
+	<tr>
+		<td colspan="3"> 
+		<p>
+			Final step! Slight contrast and saturation boost using Curves Transformation:
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="19_CTcontrastSat" src="19a_CTcontrastSat.jpg" alt="19a_CTcontrastSat" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<img src="19b_CTcontrastSat.jpg" alt="19b_CTcontrastSat" width="350" height="524"> 
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<img src="19c_CTcontrastSat.jpg" alt="19c_CTcontrastSat" width="350" height="524"> 
+		</div>
+		</td>
+	</tr>
+</table>
+<h2 id="final">
+Final result and comparison with initial light frame
+</h2>
+<p>
+For the foreground, I just integrated the calibrated light frames without registering them.
+Then I stretched the image and adjusted it (mainly for color balance) to taste.
+</p>
+<p>
+So this is it!
+On the left, the original sample light frame, here represented as de-bayered in order to simplify comparison with the right, which is the final image.
+Please note that I had to crop the final image a bit.
+</p>
+<table>
+	<tr>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="01_singleShotDebayeredNotMasked" src="01a_singleShotDebayeredNotMasked.jpg" alt="01a_singleShotDebayeredNotMasked" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img1-container">
+			<div class="img-magnifier-container">
+				<div class="img-zoom-box1">
+				</div>
+				<div class="img-zoom-box2">
+				</div>
+				<img id="S_T_merged" src="S_T_merged_a.jpg" alt="S_T_merged_a" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img2-container">
+			<div class="img-magnifier-container">
+				<img src="01b_singleShotDebayeredNotMasked.jpg" alt="01b_singleShotDebayeredNotMasked" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img2-container">
+			<div class="img-magnifier-container">
+				<img src="S_T_merged_b.jpg" alt="S_T_merged_b" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		<div class="img3-container">
+			<div class="img-magnifier-container">
+				<img src="01c_singleShotDebayeredNotMasked.jpg" alt="01c_singleShotDebayeredNotMasked" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+		<td> 
+		<div class="img3-container">
+			<div class="img-magnifier-container">
+				<img src="S_T_merged_c.jpg" alt="S_T_merged_c" width="350" height="524"><!-- 0.1x zoom -->
+			</div>
+		</div>
+		</td>
+	</tr>
+</table>
+<p>
+Thank you for reading!
+</p>
+<script>
+	/* Initiate Magnify Function */
+	magnify("z3_biasIntegrated");
+	magnify("z1_darkIntegrated");
+	magnify("01_singleShot");
+	magnify("z2_flatIntegrated");
+	magnify("z4_darkMinusBias");
+	magnify("02_calibrated");
+	magnify("03_cosmeticCorrected");
+	magnify("04_debayered");
+	magnify("05_integrated");
+	magnify("01_singleShotDebayered");
+	magnify("05_integrated_recap");
+	magnify("05_integrated_repeat");
+	magnify("06_DBEed");
+	magnify("07_BGneutralized");
+	magnify("09_colorcalibrated");
+	magnify("10_SCNRdeGreened");
+	magnify("11_MLTsmallScaleDenoised");
+	magnify("12_MMTsmallScaleDenoised");
+	magnify("13_stretched")
+	magnify("14_MLTsmallScaleDenoised");
+	magnify("15_ACDNRdenoised");
+	magnify("16_MLTchrDenoised");
+	magnify("17_stretched");
+	magnify("18_LHElocContrasted");
+	magnify("19_CTcontrastSat");
+	magnify("01_singleShotDebayeredNotMasked");
+	magnify("S_T_merged");
+</script>
+<button onclick="topFunction()" id="myBtn" title="Go to top">Top</button> <script>
+	//Get the button
+	var mybutton = document.getElementById("myBtn");
+	
+	// When the user scrolls down 20px from the top of the document, show the button
+	window.onscroll = function() {scrollFunction()};
+	
+	function scrollFunction() {
+	  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+	    mybutton.style.display = "block";
+	  } else {
+	    mybutton.style.display = "none";
+	  }
+	}
+	
+	// When the user clicks on the button, scroll to the top of the document
+	function topFunction() {
+	  document.body.scrollTop = 0;
+	  document.documentElement.scrollTop = 0;
+	}
+</script>
+<script>
+	// Get the modal
+	var modal = document.getElementById("vectorsModal");
+	
+	// Get the image and insert it inside the modal - use its "alt" text as a caption
+	var img = document.getElementById("vectorsImg");
+	var modalImg = document.getElementById("vectorsModalContent");
+	var captionText = document.getElementById("vectorsModalCaption");
+	img.onclick = function(){
+	  modal.style.display = "block";
+	  modalImg.src = this.src;
+	  captionText.innerHTML = this.alt;
+	}
+	
+	// Get the <span> element that closes the modal
+	var span = document.getElementById("vectorsModalClose");
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	  modal.style.display = "none";
+	}
+</script>
+<script>
+	// Get the modal
+	var modal = document.getElementById("vectorsModal2");
+	
+	// Get the image and insert it inside the modal - use its "alt" text as a caption
+	var img = document.getElementById("vectorsImg2");
+	var modalImg = document.getElementById("vectorsModalContent2");
+	var captionText = document.getElementById("vectorsModalCaption2");
+	img.onclick = function(){
+	  modal.style.display = "block";
+	  modalImg.src = this.src;
+	  captionText.innerHTML = this.alt;
+	}
+	
+	// Get the <span> element that closes the modal
+	var span = document.getElementById("vectorsModalClose2");
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	  modal.style.display = "none";
+	}
+</script>
+<script>
+	// Get the modal
+	var modal = document.getElementById("vectorsModal3");
+	
+	// Get the image and insert it inside the modal - use its "alt" text as a caption
+	var img = document.getElementById("vectorsImg3");
+	var modalImg = document.getElementById("vectorsModalContent3");
+	var captionText = document.getElementById("vectorsModalCaption3");
+	img.onclick = function(){
+	  modal.style.display = "block";
+	  modalImg.src = this.src;
+	  captionText.innerHTML = this.alt;
+	}
+	
+	// Get the <span> element that closes the modal
+	var span = document.getElementById("vectorsModalClose3");
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	  modal.style.display = "none";
+	}
+</script>
+<script>
+	// Get the modal
+	var modal = document.getElementById("vectorsModal4");
+	
+	// Get the image and insert it inside the modal - use its "alt" text as a caption
+	var img = document.getElementById("vectorsImg4");
+	var modalImg = document.getElementById("vectorsModalContent4");
+	var captionText = document.getElementById("vectorsModalCaption4");
+	img.onclick = function(){
+	  modal.style.display = "block";
+	  modalImg.src = this.src;
+	  captionText.innerHTML = this.alt;
+	}
+	
+	// Get the <span> element that closes the modal
+	var span = document.getElementById("vectorsModalClose4");
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	  modal.style.display = "none";
+	}
+</script>
+<script>
+	// Get the modal
+	var modal = document.getElementById("vectorsModal5");
+	
+	// Get the image and insert it inside the modal - use its "alt" text as a caption
+	var img = document.getElementById("vectorsImg5");
+	var modalImg = document.getElementById("vectorsModalContent5");
+	var captionText = document.getElementById("vectorsModalCaption5");
+	img.onclick = function(){
+	  modal.style.display = "block";
+	  modalImg.src = this.src;
+	  captionText.innerHTML = this.alt;
+	}
+	
+	// Get the <span> element that closes the modal
+	var span = document.getElementById("vectorsModalClose5");
+	
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() { 
+	  modal.style.display = "none";
+	}
+</script>
+</body>
+</html>
