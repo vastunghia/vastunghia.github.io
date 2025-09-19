@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Samples</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin: 20px auto;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    td:first-child {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    .links {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .links a {
+      margin: 0 15px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">SDR / HDR tests</h2>
+  <table>
+    <tr>
+      <th></th>
+      <th>P3</th>
+      <th>sRGB</th>
+    </tr>
+    <tr>
+      <td>SDR</td>
+      <td><a href="P3/SDR_P3.jpg">JPEG</a></td>
+      <td><a href="sRGB/SDR_sRGB.jpg">JPEG</a></td>
+    </tr>
+    <tr>
+      <td>HDR</td>
+      <td><a href="P3/HDR_P3.avif">AVIF</a></td>
+      <td><a href="sRGB/HDR_sRGB.avif">AVIF</a></td>
+    </tr>
+    <tr>
+      <td>HDR with Adobe Gain Map</td>
+      <td><a href="P3/HDR_P3_AdobeGainMap.avif">AVIF</a></td>
+      <td><a href="sRGB/HDR_sRGB_AdobeGainMap.avif">AVIF</a></td>
+    </tr>
+    <tr>
+      <td>HDR with my Gain Map</td>
+      <td><a href="P3/HDR_P3_myGainMap.avif">AVIF</a></td>
+      <td><a href="sRGB/HDR_sRGB_myGainMap.avif">AVIF</a></td>
+    </tr>
+  </table>
+
+  <div class="links">
+    <a href="p3.html">P3 sample</a>
+    <a href="srgb.html">sRGB sample</a>
+    <a href="compare.html">Compare two images</a>
+  </div>
+</body>
+</html>

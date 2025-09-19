@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Image compare (slider)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; }
+    .controls {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;
+    }
+    select, button { padding: 8px 10px; font-size: 14px; }
+    .wrapper {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      background: #eee;
+      user-select: none;
+      touch-action: none;
+    }
+    .stage {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #ccc;
+    }
+    .img-base, .img-top {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .img-top {
+      clip-path: inset(0 0 0 50%);
+    }
+    .divider {
+      position: absolute; top: 0; bottom: 0;
+      width: 2px; background: #fff;
+      border-left: 1px solid #000; border-right: 1px solid #000;
+      left: 50%;
+    }
+    .handle {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid #fff;
+      display: grid; place-items: center;
+      cursor: ew-resize;
+    }
+    .handle::before {
+      content: "⇆"; color: #fff; font-size: 18px; line-height: 1;
+    }
+    .labels {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: #333; margin-top: 8px;
+      max-width: 1200px; margin-inline: auto;
+    }
+    .note { font-size: 12px; color: #666; margin-top: 10px; max-width: 1200px; margin-inline: auto; }
+    a.back { display: inline-block; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Confronto immagini (slider)</h2>
+
+  <div class="controls">
+    <label>Left:
+      <select id="rightSel">
+        <option value="P3/SDR_P3.jpg">SDR - P3</option>
+        <option value="P3/HDR_P3.avif">HDR - P3</option>
+        <option value="P3/HDR_P3_AdobeGainMap.avif">HDR with Adobe Gain Map - P3</option>
+        <option value="P3/HDR_P3_myGainMap.avif">HDR with my Gain Map - P3</option>
+        <option value="sRGB/SDR_sRGB.jpg">SDR - sRGB</option>
+        <option value="sRGB/HDR_sRGB.avif">HDR - sRGB</option>
+        <option value="sRGB/HDR_sRGB_AdobeGainMap.avif">HDR with Adobe Gain Map - sRGB</option>
+        <option value="sRGB/HDR_sRGB_myGainMap.avif">HDR with my Gain Map - sRGB</option>
+      </select>
+    </label>
+
+    <label>Right:
+      <select id="leftSel">
+        <option value="P3/SDR_P3.jpg">SDR - P3</option>
+        <option value="P3/HDR_P3.avif">HDR - P3</option>
+        <option value="P3/HDR_P3_AdobeGainMap.avif">HDR with Adobe Gain Map - P3</option>
+        <option value="P3/HDR_P3_myGainMap.avif">HDR with my Gain Map - P3</option>
+        <option value="sRGB/SDR_sRGB.jpg">SDR - sRGB</option>
+        <option value="sRGB/HDR_sRGB.avif">HDR - sRGB</option>
+        <option value="sRGB/HDR_sRGB_AdobeGainMap.avif">HDR with Adobe Gain Map - sRGB</option>
+        <option value="sRGB/HDR_sRGB_myGainMap.avif">HDR with my Gain Map - sRGB</option>
+      </select>
+    </label>
+
+    <button id="swapBtn" type="button" title="Swap left/right">↔︎ Swap</button>
+  </div>
+
+  <div class="wrapper">
+    <div id="stage" class="stage">
+      <!-- Immagine di destra (base, sotto) -->
+      <img id="imgRight" class="img-base" src="sRGB/SDR_sRGB.jpg" alt="Destra">
+
+      <!-- Immagine di sinistra (sopra, clip) -->
+      <img id="imgLeft" class="img-top" src="P3/SDR_P3.jpg" alt="Sinistra">
+
+      <div id="divider" class="divider" style="left:50%"></div>
+      <div id="handle" class="handle" style="left:50%"></div>
+    </div>
+  </div>
+
+  <div class="labels">
+    <div><strong>Left:</strong> <span id="leftLabel">P3/SDR_P3.jpg</span></div>
+    <div><strong>Right:</strong> <span id="rightLabel">sRGB/SDR_sRGB.jpg</span></div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const leftSel   = document.getElementById('leftSel');
+    const rightSel  = document.getElementById('rightSel');
+    const imgLeft   = document.getElementById('imgLeft');   // sopra
+    const imgRight  = document.getElementById('imgRight'); // sotto
+    const leftLabel = document.getElementById('leftLabel');
+    const rightLabel= document.getElementById('rightLabel');
+    const stage     = document.getElementById('stage');
+    const divider   = document.getElementById('divider');
+    const handle    = document.getElementById('handle');
+    const swapBtn   = document.getElementById('swapBtn');
+
+    function fitStageToRight() {
+      const tmp = new Image();
+      tmp.onload = () => {
+        const wrapperWidth = stage.clientWidth || stage.parentElement.clientWidth;
+        const ratio = tmp.height / tmp.width;
+        stage.style.height = Math.max(200, Math.round(wrapperWidth * ratio)) + 'px';
+      };
+      tmp.src = imgRight.currentSrc || imgRight.src;
+    }
+
+    function updateLabels() {
+      leftLabel.textContent  = leftSel.value;
+      rightLabel.textContent = rightSel.value;
+    }
+
+    leftSel.addEventListener('change', () => {
+      imgLeft.src = leftSel.value;
+      updateLabels();
+    });
+
+    rightSel.addEventListener('change', () => {
+      imgRight.src = rightSel.value;
+      updateLabels();
+      setTimeout(fitStageToRight, 50);
+    });
+
+    swapBtn.addEventListener('click', () => {
+      const l = leftSel.value, r = rightSel.value;
+      leftSel.value = r; rightSel.value = l;
+      imgLeft.src = leftSel.value;
+      imgRight.src = rightSel.value;
+      updateLabels();
+      setTimeout(fitStageToRight, 50);
+    });
+
+    let isDragging = false;
+    function setSplitFromClientX(clientX) {
+      const rect = stage.getBoundingClientRect();
+      let x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      const percent = (x / rect.width) * 100;
+      divider.style.left = percent + '%';
+      handle.style.left  = percent + '%';
+      imgLeft.style.clipPath = `inset(0 0 0 ${percent}%)`;
+    }
+    function onDown(e) {
+      isDragging = true;
+      const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      setSplitFromClientX(clientX);
+      e.preventDefault();
+    }
+    function onMove(e) {
+      if (!isDragging) return;
+      const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      setSplitFromClientX(clientX);
+      e.preventDefault();
+    }
+    function onUp() { isDragging = false; }
+
+    [stage, handle].forEach(el => {
+      el.addEventListener('mousedown', onDown);
+      el.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+
+      el.addEventListener('touchstart', onDown, {passive:false});
+      el.addEventListener('touchmove', onMove, {passive:false});
+      window.addEventListener('touchend', onUp);
+      window.addEventListener('touchcancel', onUp);
+    });
+
+    window.addEventListener('load', fitStageToRight);
+    window.addEventListener('resize', () => { setTimeout(fitStageToRight, 50); });
+
+    updateLabels();
+  </script>
+</body>
+</html>
